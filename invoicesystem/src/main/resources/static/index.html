@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Invoice System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <main class="container py-4">
+      <header
+        class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+      >
+        <div>
+          <p class="text-uppercase small text-muted mb-1">EG Invoice System</p>
+          <h1 class="h2 mb-0">Invoices</h1>
+        </div>
+        <button id="refreshBtn" class="btn btn-outline-primary">Refresh</button>
+      </header>
+
+      <section class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5">Create Invoice</h2>
+          <form id="createForm" class="row g-3 align-items-end">
+            <div class="col-sm-6 col-lg-4">
+              <label class="form-label">Amount</label>
+              <input
+                class="form-control"
+                name="amount"
+                type="number"
+                step="1"
+                min="1"
+                required
+              />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+              <label class="form-label">Due date</label>
+              <input
+                class="form-control"
+                name="due_date"
+                type="date"
+                required
+              />
+            </div>
+            <div class="col-sm-12 col-lg-4 d-grid d-lg-block">
+              <button class="btn btn-primary" type="submit">Create</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5">Invoices List</h2>
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Amount</th>
+                  <th>Paid</th>
+                  <th>Due date</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceRows">
+                <tr>
+                  <td colspan="6" class="text-muted">No invoices yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5">Process Overdue</h2>
+          <form id="processForm" class="row g-3 align-items-end">
+            <div class="col-sm-6 col-lg-4">
+              <label class="form-label">Late fee</label>
+              <input
+                class="form-control"
+                name="late_fee"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+              />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+              <label class="form-label">Overdue days</label>
+              <input
+                class="form-control"
+                name="overdue_days"
+                type="number"
+                min="1"
+                required
+              />
+            </div>
+            <div class="col-sm-12 col-lg-4 d-grid d-lg-block">
+              <button class="btn btn-danger" type="submit">Process</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <div id="status" class="small text-muted"></div>
+    </main>
+    <script>
+      const invoiceRows = document.getElementById("invoiceRows");
+      const statusEl = document.getElementById("status");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const createForm = document.getElementById("createForm");
+      const processForm = document.getElementById("processForm");
+
+      function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        statusEl.className = `small ${isError ? "text-danger" : "text-muted"}`;
+      }
+
+      async function fetchInvoices() {
+        const res = await fetch("/invoices");
+        if (!res.ok) throw new Error("Failed to fetch invoices.");
+        return res.json();
+      }
+
+      function renderInvoices(invoices) {
+        if (!invoices.length) {
+          invoiceRows.innerHTML =
+            '<tr><td colspan="6" class="text-muted">No invoices yet.</td></tr>';
+          return;
+        }
+
+        invoiceRows.innerHTML = invoices
+          .map((invoice) => {
+            return `
+              <tr>
+                <td class="text-break">${invoice.id}</td>
+                <td>${invoice.amount}</td>
+                <td>${invoice.paidAmount}</td>
+                <td>${invoice.dueDate}</td>
+                <td><span class="badge text-bg-light">${invoice.status}</span></td>
+                <td>
+                  <form class="pay-form d-flex flex-column flex-md-row gap-2 align-items-stretch" data-id="${invoice.id}">
+                    <input class="form-control form-control-sm" name="amount" type="number" step="0.01" min="0.01" placeholder="Amount" required />
+                    <button class="btn btn-sm btn-secondary" type="submit">Pay</button>
+                  </form>
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      async function refresh() {
+        try {
+          const invoices = await fetchInvoices();
+          renderInvoices(invoices);
+          setStatus("Invoices updated.");
+        } catch (err) {
+          setStatus(err.message, true);
+        }
+      }
+
+      refreshBtn.addEventListener("click", refresh);
+
+      createForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const payload = {
+          amount: form.amount.value,
+          due_date: form.due_date.value,
+        };
+
+        try {
+          const res = await fetch("/invoices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("Failed to create invoice.");
+          form.reset();
+          await refresh();
+        } catch (err) {
+          setStatus(err.message, true);
+        }
+      });
+
+      invoiceRows.addEventListener("submit", async (event) => {
+        const form = event.target.closest(".pay-form");
+        if (!form) return;
+        event.preventDefault();
+        const id = form.dataset.id;
+        const payload = { amount: form.amount.value };
+
+        try {
+          const res = await fetch(`/invoices/${id}/payments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("Failed to apply payment.");
+          form.reset();
+          await refresh();
+        } catch (err) {
+          setStatus(err.message, true);
+        }
+      });
+
+      processForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const payload = {
+          late_fee: form.late_fee.value,
+          overdue_days: form.overdue_days.value,
+        };
+
+        try {
+          const res = await fetch("/invoices/process-overdue", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("Failed to process overdue invoices.");
+          form.reset();
+          await refresh();
+        } catch (err) {
+          setStatus(err.message, true);
+        }
+      });
+
+      refresh();
+    </script>
+  </body>
+</html>
