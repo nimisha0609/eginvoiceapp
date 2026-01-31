@@ -118,3 +118,4 @@ Optional query parameters:
 
 - Data is stored in memory; restarting the app clears all invoices.
 - Dates are ISO-8601 (`YYYY-MM-DD`).
+- Postman Collection to test all the calls is kept in the root folder

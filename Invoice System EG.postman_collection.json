@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "c1d69eb0-2a54-4d00-8fea-ff9d7c9154e7",
+    "name": "Invoice System EG",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24640366"
+  },
+  "item": [
+    {
+      "name": "Get All Invoices",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/invoices",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "invoices"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST http://localhost:8080/invoices \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"amount\":100,\"due_date\":\"2026-02-01\"}'\r\n"
+      },
+      "response": []
+    },
+    {
+      "name": "Create an Invoice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"amount\": 300,\r\n    \"due_date\": \"2025-09-11\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/invoices",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "invoices"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST http://localhost:8080/invoices \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"amount\":100,\"due_date\":\"2026-02-01\"}'\r\n"
+      },
+      "response": []
+    },
+    {
+      "name": "Do a Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"amount\": 50\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/invoices/:id/payments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "invoices",
+            ":id",
+            "payments"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "dc184296-651f-4cc8-998f-b184a03905f4"
+            }
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST http://localhost:8080/invoices/{id}/payments \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"amount\":50}'\r\n"
+      },
+      "response": []
+    },
+    {
+      "name": "Process Overdues",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"late_fee\": 10,\r\n    \"overdue_days\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/invoices/process-overdue",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "invoices",
+            "process-overdue"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST http://localhost:8080/invoices/{id}/payments \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"amount\":50}'\r\n"
+      },
+      "response": []
+    }
+  ]
+}

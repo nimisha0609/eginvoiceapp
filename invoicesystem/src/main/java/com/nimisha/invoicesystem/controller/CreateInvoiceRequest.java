@@ -4,13 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
 public class CreateInvoiceRequest {
 
     @NotNull
-    @DecimalMin(value = "1", inclusive = true)
     private BigDecimal amount;
 
     @NotNull
